@@ -1,14 +1,21 @@
 {
   "name": "@saiuttej/nestjs-mailer",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "NestJs Module build send mails",
   "author": "B Sai Uttej",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saiuttej-b/nestjs-mailer"
+  },
   "keywords": [
     "nestjs",
     "mails"
   ],
   "main": "dist/index.js",
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "build": "rm -rf dist && tsc",
     "prepublish": "npm run build",
