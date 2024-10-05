@@ -34,7 +34,7 @@ pnpm add @saiuttej/nestjs-mailer
 
 ## Contributing
 
-Contributions welcome! See [Contributing](CONTRIBUTING.md).
+Contributions welcome! See [Contributing](https://github.com/saiuttej-b/nestjs-mailer/blob/main/CONTRIBUTING.md).
 
 ## Author
 
