@@ -1,12 +1,15 @@
 {
   "name": "@saiuttej/nestjs-mailer",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "NestJs Module build send mails",
   "author": "B Sai Uttej",
-  "license": "ISC",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/saiuttej-b/nestjs-mailer"
+  },
+  "bugs": {
+    "url": "https://github.com/saiuttej-b/nestjs-mailer/issues"
   },
   "keywords": [
     "nestjs",
@@ -14,7 +17,9 @@
   ],
   "main": "dist/index.js",
   "files": [
-    "dist/**/*"
+    "dist/**/*",
+    "*.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "rm -rf dist && tsc",
