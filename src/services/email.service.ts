@@ -1,13 +1,12 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { EmailClientService } from '../clients/email-client.service';
-import { EmailSmtpClientService } from '../clients/email-smtp-client.service';
 import { SESClientService } from '../clients/ses-client.service';
 import { EMAIL_OPTIONS } from '../constants/email.constants';
 import {
-  DirectEmailProps,
   EmailClientOptions,
   EmailClientTypes,
   EmailModuleOptions,
+  SendEmailProps,
 } from '../types/emails.types';
 
 @Injectable()
@@ -16,11 +15,9 @@ export class EmailService implements OnModuleInit {
 
   constructor(
     @Inject(EMAIL_OPTIONS) private readonly options: EmailModuleOptions,
-    private readonly emailSMTPClient: EmailSmtpClientService,
     private readonly sesClient: SESClientService,
   ) {
     this.clientMap = new Map();
-    this.clientMap.set(EmailClientTypes.EMAIL_SMTP, this.emailSMTPClient);
     this.clientMap.set(EmailClientTypes.SES, this.sesClient);
   }
 
@@ -44,7 +41,7 @@ export class EmailService implements OnModuleInit {
     }
   }
 
-  async send(props: DirectEmailProps): Promise<any> {
+  async send(props: SendEmailProps): Promise<any> {
     const { emailData, client } = props;
 
     const options = this.getClientOptions(client);

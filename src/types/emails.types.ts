@@ -25,16 +25,13 @@ export type EmailBodyProps = {
   headers?: Record<string, string>;
 };
 
-export type DirectEmailProps = {
-  emailData: EmailBodyProps;
-  client?: string | EmailClientOptions;
-};
-
 export enum EmailClientTypes {
   SES = 'SES',
-  EMAIL_SMTP = 'EMAIL_SMTP',
 }
 
+/**
+ * SES Client Types
+ */
 export type SESOptions = {
   credentials: {
     region: string;
@@ -44,27 +41,20 @@ export type SESOptions = {
   };
 };
 
-export type EmailSmtpOptions = {
-  host: string;
-  port: number;
-  secure: boolean;
-  auth: {
-    user: string;
-    pass: string;
-  };
-};
-
 export type SESClientOptions = {
   type: EmailClientTypes.SES;
   SES: SESOptions;
 };
 
-export type EmailSmtpClientOptions = {
-  type: EmailClientTypes.EMAIL_SMTP;
-  EMAIL_SMTP: EmailSmtpOptions;
-};
+/**
+ * Email Client Options Type and Module Options Type
+ */
+export type EmailClientOptions = SESClientOptions;
 
-export type EmailClientOptions = SESClientOptions | EmailSmtpClientOptions;
+export type SendEmailProps = {
+  emailData: EmailBodyProps;
+  client?: string | EmailClientOptions;
+};
 
 export type EmailModuleClientOptions = { key: string; default?: boolean } & EmailClientOptions;
 

@@ -1,5 +1,4 @@
-import { DynamicModule, Global, Module } from '@nestjs/common';
-import { EmailSmtpClientService } from './clients/email-smtp-client.service';
+import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import { SESClientService } from './clients/ses-client.service';
 import { EMAIL_OPTIONS } from './constants/email.constants';
 import { EmailContentGeneratorService } from './services/email-content-generator.service';
@@ -7,15 +6,11 @@ import { EmailUtilsService } from './services/email-utils.service';
 import { EmailService } from './services/email.service';
 import { EmailModuleAsyncOptions, EmailModuleOptions } from './types/emails.types';
 
+const clients: Provider[] = [SESClientService];
+
 @Global()
 @Module({
-  providers: [
-    EmailUtilsService,
-    EmailContentGeneratorService,
-    EmailService,
-    EmailSmtpClientService,
-    SESClientService,
-  ],
+  providers: [EmailUtilsService, EmailContentGeneratorService, EmailService, ...clients],
   exports: [EmailService],
 })
 export class EmailsModule {
@@ -30,8 +25,7 @@ export class EmailsModule {
         EmailUtilsService,
         EmailContentGeneratorService,
         EmailService,
-        EmailSmtpClientService,
-        SESClientService,
+        ...clients,
       ],
       exports: [EmailService],
       global: true,
@@ -51,8 +45,7 @@ export class EmailsModule {
         EmailUtilsService,
         EmailContentGeneratorService,
         EmailService,
-        EmailSmtpClientService,
-        SESClientService,
+        ...clients,
       ],
       exports: [EmailService],
       global: true,
