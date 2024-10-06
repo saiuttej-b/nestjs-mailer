@@ -1,11 +1,14 @@
+import { SendRawEmailCommandInput, SESClientConfigType } from '@aws-sdk/client-ses';
 import { ModuleMetadata } from '@nestjs/common';
 import { Readable } from 'node:stream';
 import { Url } from 'node:url';
 
-export type EmailUserAddress = {
-  name?: string;
-  address: string;
-};
+export type EmailUserAddress =
+  | string
+  | {
+      name: string;
+      address: string;
+    };
 
 export type EmailAttachment = {
   filename: string;
@@ -32,13 +35,12 @@ export enum EmailClientTypes {
 /**
  * SES Client Types
  */
+
+export type SESSendOptions = Omit<SendRawEmailCommandInput, 'RawMessage'>;
+
 export type SESOptions = {
-  credentials: {
-    region: string;
-    accessKeyId: string;
-    secretAccessKey: string;
-    email: string;
-  };
+  config: SESClientConfigType;
+  defaultFromEmail: string;
 };
 
 export type SESClientOptions = {
@@ -47,15 +49,23 @@ export type SESClientOptions = {
 };
 
 /**
- * Email Client Options Type and Module Options Type
+ * Email Client Options Type
  */
 export type EmailClientOptions = SESClientOptions;
+
+export type AdditionalSendEmailProps = {
+  SES?: SESSendOptions;
+};
 
 export type SendEmailProps = {
   emailData: EmailBodyProps;
   client?: string | EmailClientOptions;
+  options?: AdditionalSendEmailProps;
 };
 
+/**
+ * Module Options Types
+ */
 export type EmailModuleClientOptions = { key: string; default?: boolean } & EmailClientOptions;
 
 export type EmailModuleOptions = {

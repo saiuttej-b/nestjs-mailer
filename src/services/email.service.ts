@@ -42,19 +42,19 @@ export class EmailService implements OnModuleInit {
   }
 
   async send(props: SendEmailProps): Promise<any> {
-    const { emailData, client } = props;
+    const { emailData, client, options } = props;
 
-    const options = this.getClientOptions(client);
-    if (!options) {
+    const clientOptions = this.getClientOptions(client);
+    if (!clientOptions) {
       throw new Error('Invalid email service client options');
     }
 
-    const clientService = this.clientMap.get(options.type);
+    const clientService = this.clientMap.get(clientOptions.type);
     if (!clientService) {
       throw new Error('Unable to find email service client');
     }
 
-    return clientService.send({ emailData, options });
+    return clientService.send({ emailData, clientOptions, options });
   }
 
   private getClientOptions(client?: string | EmailClientOptions) {

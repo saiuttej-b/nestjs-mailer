@@ -26,21 +26,10 @@ export class EmailContentGeneratorService {
     const html = body.body;
 
     const mail = new MailComposer({
-      from: body.from?.name
-        ? { address: body.from.address, name: body.from.name }
-        : body.from?.address,
-      to: body.to.map((to) => {
-        if (!to.name) return to.address;
-        return { address: to.address, name: to.name };
-      }),
-      cc: body.cc?.map((cc) => {
-        if (!cc.name) return cc.address;
-        return { address: cc.address, name: cc.name };
-      }),
-      bcc: body.bcc?.map((bcc) => {
-        if (!bcc.name) return bcc.address;
-        return { address: bcc.address, name: bcc.name };
-      }),
+      from: body.from,
+      to: body.to,
+      cc: body.cc,
+      bcc: body.bcc,
       subject: body.subject,
       html: html,
       attachments: body.attachments,
