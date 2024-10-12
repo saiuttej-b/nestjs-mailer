@@ -1,6 +1,6 @@
 import { SendRawEmailCommand, SESClient } from '@aws-sdk/client-ses';
 import { Injectable } from '@nestjs/common';
-import { EmailContentGeneratorService } from '../services/email-content-generator.service';
+import { EmailUtilsService } from '../services/email-utils.service';
 import {
   AdditionalSendEmailProps,
   EmailBodyProps,
@@ -14,37 +14,33 @@ import { EmailClientService } from './email-client.service';
 export class SESClientService implements EmailClientService {
   private readonly sesClients = new Map<string, SESClient>();
 
-  constructor(private readonly generatorService: EmailContentGeneratorService) {}
+  constructor(private readonly emailUtilsService: EmailUtilsService) {}
 
   async send(props: {
     emailData: EmailBodyProps;
     clientOptions: EmailClientOptions;
     options?: AdditionalSendEmailProps;
   }): Promise<any> {
-    const { emailData, clientOptions } = props;
+    const { emailData, clientOptions, options } = props;
 
     if (clientOptions.type !== EmailClientTypes.SES) {
       throw new Error('Invalid email service client');
     }
 
     if (!emailData.from) {
-      emailData.from = clientOptions.SES.defaultFromEmail;
+      emailData.from = clientOptions.SES.defaultSenderEmail;
     }
 
-    const message = await this.generatorService.getParsedContent(emailData);
-
     const sesClient = this.getSESClient(clientOptions.SES);
+    const message = await this.emailUtilsService.getParsedContent(emailData);
+
     const command = new SendRawEmailCommand({
-      ...(props.options?.SES || {}),
+      ...(options || {}),
       RawMessage: { Data: message },
     });
 
-    try {
-      const response = await sesClient.send(command);
-      return response;
-    } catch (err) {
-      throw err;
-    }
+    const response = await sesClient.send(command);
+    return response;
   }
 
   private getSESClient(reqOptions: SESOptions) {

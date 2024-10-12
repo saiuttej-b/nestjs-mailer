@@ -1,16 +1,16 @@
 import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
+import { MailtrapClientService } from './clients/mailtrap-client.service';
 import { SESClientService } from './clients/ses-client.service';
 import { EMAIL_OPTIONS } from './constants/email.constants';
-import { EmailContentGeneratorService } from './services/email-content-generator.service';
 import { EmailUtilsService } from './services/email-utils.service';
 import { EmailService } from './services/email.service';
 import { EmailModuleAsyncOptions, EmailModuleOptions } from './types/emails.types';
 
-const clients: Provider[] = [SESClientService];
+const clients: Provider[] = [SESClientService, MailtrapClientService];
 
 @Global()
 @Module({
-  providers: [EmailUtilsService, EmailContentGeneratorService, EmailService, ...clients],
+  providers: [EmailUtilsService, EmailService, ...clients],
   exports: [EmailService],
 })
 export class EmailsModule {
@@ -23,7 +23,6 @@ export class EmailsModule {
           useValue: options,
         },
         EmailUtilsService,
-        EmailContentGeneratorService,
         EmailService,
         ...clients,
       ],
@@ -43,7 +42,6 @@ export class EmailsModule {
           inject: options.inject,
         },
         EmailUtilsService,
-        EmailContentGeneratorService,
         EmailService,
         ...clients,
       ],

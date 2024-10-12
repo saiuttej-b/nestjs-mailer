@@ -1,7 +1,8 @@
-import { SendRawEmailCommandInput, SESClientConfigType } from '@aws-sdk/client-ses';
-import { ModuleMetadata } from '@nestjs/common';
-import { Readable } from 'node:stream';
-import { Url } from 'node:url';
+import type { SendRawEmailCommandInput, SESClientConfigType } from '@aws-sdk/client-ses';
+import type { ModuleMetadata } from '@nestjs/common';
+import type { CustomVariables, MailtrapClientConfig } from 'mailtrap';
+import type { Readable } from 'node:stream';
+import type { Url } from 'node:url';
 
 export type EmailUserAddress =
   | string
@@ -15,6 +16,8 @@ export type EmailAttachment = {
   contentType?: string;
   content?: string | Buffer | Readable;
   path?: string | Url;
+  cid?: string;
+  encoding?: string;
 };
 
 export type EmailBodyProps = {
@@ -23,13 +26,14 @@ export type EmailBodyProps = {
   cc?: EmailUserAddress[];
   bcc?: EmailUserAddress[];
   subject: string;
-  body: string;
+  body: string | Buffer;
   attachments?: EmailAttachment[];
   headers?: Record<string, string>;
 };
 
 export enum EmailClientTypes {
   SES = 'SES',
+  MAILTRAP = 'MAILTRAP',
 }
 
 /**
@@ -40,7 +44,7 @@ export type SESSendOptions = Omit<SendRawEmailCommandInput, 'RawMessage'>;
 
 export type SESOptions = {
   config: SESClientConfigType;
-  defaultFromEmail: string;
+  defaultSenderEmail: string;
 };
 
 export type SESClientOptions = {
@@ -49,13 +53,30 @@ export type SESClientOptions = {
 };
 
 /**
+ * MailTrap Client Types
+ */
+export type MailtrapSendOptions = {
+  category?: string;
+  custom_variables?: CustomVariables;
+  sandbox?: boolean | undefined;
+};
+
+export type MailtrapOptions = {
+  config: MailtrapClientConfig;
+  defaultSenderEmail: string;
+};
+
+export type MailtrapClientOptions = {
+  type: EmailClientTypes.MAILTRAP;
+  MAILTRAP: MailtrapOptions;
+};
+
+/**
  * Email Client Options Type
  */
-export type EmailClientOptions = SESClientOptions;
+export type EmailClientOptions = SESClientOptions | MailtrapClientOptions;
 
-export type AdditionalSendEmailProps = {
-  SES?: SESSendOptions;
-};
+export type AdditionalSendEmailProps = SESSendOptions & MailtrapSendOptions;
 
 export type SendEmailProps = {
   emailData: EmailBodyProps;

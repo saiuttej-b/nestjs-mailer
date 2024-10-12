@@ -1,5 +1,6 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { EmailClientService } from '../clients/email-client.service';
+import { MailtrapClientService } from '../clients/mailtrap-client.service';
 import { SESClientService } from '../clients/ses-client.service';
 import { EMAIL_OPTIONS } from '../constants/email.constants';
 import {
@@ -16,9 +17,11 @@ export class EmailService implements OnModuleInit {
   constructor(
     @Inject(EMAIL_OPTIONS) private readonly options: EmailModuleOptions,
     private readonly sesClient: SESClientService,
+    private readonly mailtrapClient: MailtrapClientService,
   ) {
     this.clientMap = new Map();
     this.clientMap.set(EmailClientTypes.SES, this.sesClient);
+    this.clientMap.set(EmailClientTypes.MAILTRAP, this.mailtrapClient);
   }
 
   onModuleInit() {
