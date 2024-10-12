@@ -1,7 +1,7 @@
 {
   "name": "@saiuttej/nestjs-mailer",
   "version": "0.0.7",
-  "description": "NestJs Module build send mails",
+  "description": "NestJs Module built to send mails",
   "author": "B Sai Uttej",
   "license": "MIT",
   "repository": {
@@ -13,7 +13,9 @@
   },
   "keywords": [
     "nestjs",
-    "mails"
+    "mails",
+    "ses",
+    "mailtrap"
   ],
   "main": "dist/index.js",
   "files": [

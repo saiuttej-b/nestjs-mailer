@@ -12,7 +12,7 @@
   </a>
 </div>
 
-### Installation
+## Installation
 
 Install via NPM:
 
@@ -31,6 +31,61 @@ Install via PNPM:
 ```bash
 pnpm add @saiuttej/nestjs-mailer
 ```
+
+## Quick Start
+
+### Register Module
+
+```ts
+@Module({
+  imports: [
+    EmailsModule.forRoot({
+      clients: [],
+    }),
+  ],
+})
+class AppModule {}
+```
+
+Quite often you might want to asynchronously pass module options instead of passing them beforehand. In such case, use forRootAsync() method like many other Nest.js libraries.
+
+```ts
+EmailsModule.forRootAsync({
+  useFactory: () => {
+    return {
+      clients: [],
+    };
+  },
+});
+```
+
+### Clients Type
+
+#### 1. SES
+
+Configuring SES
+
+```ts
+EmailsModule.forRoot({
+  clients: [
+    {
+      type: EmailClientTypes.SES,
+      key: 'unique-client-key',
+      SES: {
+        config: {
+          credentials: {
+            accessKeyId: 'your aws accessKeyId',
+            secretAccessKey: 'your aws secretAccessKey',
+          },
+        },
+        defaultSenderEmail: 'your default sender email id',
+      },
+    },
+  ],
+});
+```
+
+#### 2. Mailtrap
 
 ## Contributing
 
