@@ -2,6 +2,7 @@ import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
 import { MailtrapClientService } from './clients/mailtrap-client.service';
 import { SESClientService } from './clients/ses-client.service';
 import { EMAIL_OPTIONS } from './constants/email.constants';
+import { EmailClientHandlerService } from './services/email-client-handler.service';
 import { EmailUtilsService } from './services/email-utils.service';
 import { EmailService } from './services/email.service';
 import { EmailModuleAsyncOptions, EmailModuleOptions } from './types/emails.types';
@@ -10,7 +11,7 @@ const clients: Provider[] = [SESClientService, MailtrapClientService];
 
 @Global()
 @Module({
-  providers: [EmailUtilsService, EmailService, ...clients],
+  providers: [EmailUtilsService, EmailService, EmailClientHandlerService, ...clients],
   exports: [EmailService],
 })
 export class EmailsModule {
@@ -22,6 +23,7 @@ export class EmailsModule {
           provide: EMAIL_OPTIONS,
           useValue: options,
         },
+        EmailClientHandlerService,
         EmailUtilsService,
         EmailService,
         ...clients,
@@ -41,6 +43,7 @@ export class EmailsModule {
           useFactory: options.useFactory,
           inject: options.inject,
         },
+        EmailClientHandlerService,
         EmailUtilsService,
         EmailService,
         ...clients,

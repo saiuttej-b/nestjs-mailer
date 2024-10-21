@@ -12,7 +12,7 @@
   </a>
 </div>
 
-### Installation
+## Installation
 
 Install via NPM:
 
@@ -30,6 +30,136 @@ Install via PNPM:
 
 ```bash
 pnpm add @saiuttej/nestjs-mailer
+```
+
+## Quick Start
+
+### Register Module
+
+```ts
+@Module({
+  imports: [
+    EmailsModule.forRoot({
+      clients: [],
+    }),
+  ],
+})
+class AppModule {}
+```
+
+Quite often you might want to asynchronously pass module options instead of passing them beforehand. In such case, use forRootAsync() method like many other Nest.js libraries.
+
+```ts
+EmailsModule.forRootAsync({
+  useFactory: (...deps) => {
+    return {
+      clients: [],
+    };
+  },
+  inject: [...dependencies],
+});
+```
+
+### Clients Type
+
+#### 1. SES
+
+Configuring SES
+
+```ts
+EmailsModule.forRoot({
+  clients: [
+    {
+      type: EmailClientTypes.SES,
+      key: 'unique-client-key',
+      SES: {
+        config: {
+          credentials: {
+            accessKeyId: 'aws-access-key',
+            secretAccessKey: 'aws-secret-access-key',
+          },
+        },
+        defaultSenderEmail: 'default-sender-email@gmail.com',
+      },
+    },
+  ],
+});
+```
+
+#### 2. Mailtrap
+
+```ts
+EmailsModule.forRoot({
+  clients: [
+    {
+      type: EmailClientTypes.MAILTRAP,
+      key: 'unique-client-key',
+      MAILTRAP: {
+        config: {
+          token: 'mailtrap-token',
+        },
+        defaultSenderEmail: 'default-sender-email@gmail.com',
+      },
+    },
+  ],
+});
+```
+
+EmailClientTypes is an enum that contains all the supported email clients.
+
+### Sending Emails
+
+```ts
+import { Injectable } from '@nestjs/common';
+import {
+  AdditionalSendEmailProps,
+  EmailBodyProps,
+  EmailClientOptions,
+  EmailService,
+} from '@saiuttej/nestjs-mailer';
+
+@Injectable()
+export class AppService {
+  constructor(private readonly emailsService: EmailService) {}
+
+  async sendEmail() {
+    /**
+     * It is the configuration for send email
+     * It can have two types of values:
+     * 1. string - The client key which is registered in the EmailsModule.
+     * 2. EmailClientConfig - The client configuration object.
+     */
+    const client: string | EmailClientOptions = 'unique-client-key';
+
+    /**
+     * It is the email data object which contains the email details.
+     * it contains the properties like
+     * from, to, cc, bcc, subject, body, attachments, headers
+     */
+    const emailData: EmailBodyProps = {
+      from: 'sender-email-id@gmail.com' /* optional */,
+      to: ['to-email-ids@gmail.com'] /* required */,
+      cc: [] /* optional */,
+      bcc: [] /* optional */,
+      subject: 'Email Subject' /* required */,
+      body: 'Hello, World!' /* required - supports html, text and buffer */,
+      attachments: [] /* optional - supports attachments */,
+      headers: {} /* optional */,
+    };
+
+    /**
+     * It is the additional options for sending email,
+     * it contains different email sending options for the client.
+     */
+    const options: AdditionalSendEmailProps = {};
+
+    await this.emailsService.send({
+      client,
+      emailData,
+      options,
+    });
+  }
+}
 ```
 
 ## Contributing
