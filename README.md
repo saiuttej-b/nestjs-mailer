@@ -4,7 +4,7 @@
   </a>
 </div>
 
-<h3 align="center">NestJS npm Package Starter</h3>
+<h3 align="center">NestJS Mailer</h3>
 
 <div align="center">
   <a href="https://nestjs.com" target="_blank">
@@ -50,14 +50,19 @@ class AppModule {}
 Quite often you might want to asynchronously pass module options instead of passing them beforehand. In such case, use forRootAsync() method like many other Nest.js libraries.
 
 ```ts
-EmailsModule.forRootAsync({
-  useFactory: (...deps) => {
-    return {
-      clients: [],
-    };
-  },
-  inject: [...dependencies],
-});
+@Module({
+  imports: [
+    EmailsModule.forRootAsync({
+      useFactory: (...deps) => {
+        return {
+          clients: [],
+        };
+      },
+      inject: [...dependencies],
+    }),
+  ],
+})
+class AppModule {}
 ```
 
 ### Clients Type
