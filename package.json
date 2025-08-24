@@ -1,6 +1,6 @@
 {
   "name": "@saiuttej/nestjs-mailer",
-  "version": "0.0.11",
+  "version": "0.1.0",
   "description": "NestJs Module built to send mails",
   "author": "B Sai Uttej",
   "license": "MIT",
