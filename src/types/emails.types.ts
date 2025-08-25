@@ -43,8 +43,8 @@ export enum EmailClientTypes {
 export type SESSendOptions = Omit<SendRawEmailCommandInput, 'RawMessage'>;
 
 export type SESOptions = {
-  config: SESClientConfigType;
   defaultSenderEmail: string;
+  config?: SESClientConfigType;
 };
 
 export type SESClientOptions = {

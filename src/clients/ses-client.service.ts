@@ -44,7 +44,7 @@ export class SESClientService implements EmailClientService {
   }
 
   private getSESClient(reqOptions: SESOptions) {
-    const credentials = reqOptions.config;
+    const credentials = reqOptions.config || {};
 
     const key = JSON.stringify(credentials);
     const cachedClient = this.sesClients.get(key);
