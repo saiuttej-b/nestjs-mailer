@@ -1,20 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { MailtrapTransport } from 'mailtrap';
-import { MailtrapTransporter } from 'mailtrap/dist/types/transport';
-import { createTransport } from 'nodemailer';
+import { createTransport, type SendMailOptions, type Transporter } from 'nodemailer';
 import { EmailUtilsService } from '../services/email-utils.service';
 import {
-  AdditionalSendEmailProps,
-  EmailBodyProps,
-  EmailClientOptions,
-  EmailClientTypes,
-  MailtrapOptions,
+    AdditionalSendEmailProps,
+    EmailBodyProps,
+    EmailClientOptions,
+    EmailClientTypes,
+    MailtrapOptions,
 } from '../types/emails.types';
 import { EmailClientService } from './email-client.service';
 
 @Injectable()
 export class MailtrapClientService implements EmailClientService {
-  private readonly mailtrapTransports = new Map<string, MailtrapTransporter>();
+  private readonly mailtrapTransports = new Map<string, Transporter<any>>();
 
   constructor(private readonly emailUtilService: EmailUtilsService) {}
 
@@ -44,7 +43,7 @@ export class MailtrapClientService implements EmailClientService {
       bcc: body.bcc,
       subject: body.subject,
       html: body.body,
-      attachments: body.attachments,
+      attachments: body.attachments as SendMailOptions['attachments'],
       headers: body.headers,
     });
 

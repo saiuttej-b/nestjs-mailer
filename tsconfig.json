@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
+    "module": "commonjs",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -16,7 +16,7 @@
     "forceConsistentCasingInFileNames": true,
     "noLib": false,
     "skipLibCheck": true,
-    "moduleResolution": "node"
+    "moduleResolution": "bundler"
   },
   "exclude": ["node_modules", "test", "dist", "**/*spec.ts"],
   "include": ["src/**/*.ts"]

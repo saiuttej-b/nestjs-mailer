@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { SendMailOptions } from 'nodemailer';
 import MailComposer from 'nodemailer/lib/mail-composer';
 import { EmailBodyProps, EmailUserAddress } from '../types/emails.types';
 
@@ -60,7 +61,7 @@ export class EmailUtilsService {
       bcc: body.bcc,
       subject: body.subject,
       html: body.body,
-      attachments: body.attachments,
+      attachments: body.attachments as SendMailOptions['attachments'],
       headers: body.headers,
     });
 
