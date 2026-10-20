@@ -1,6 +1,3 @@
-import type { SendRawEmailCommandInput, SESClientConfigType } from '@aws-sdk/client-ses';
-import type { ModuleMetadata } from '@nestjs/common';
-import type { CustomVariables, MailtrapClientConfig } from 'mailtrap';
 import type { Readable } from 'node:stream';
 import type { Url } from 'node:url';
 
@@ -26,7 +23,8 @@ export type EmailBodyProps = {
   cc?: EmailUserAddress[];
   bcc?: EmailUserAddress[];
   subject: string;
-  body: string | Buffer;
+  text?: string;
+  html?: string;
   attachments?: EmailAttachment[];
   headers?: Record<string, string>;
 };
@@ -36,15 +34,38 @@ export enum EmailClientTypes {
   MAILTRAP = 'MAILTRAP',
 }
 
-/**
- * SES Client Types
- */
+export type SESCredentials = {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken?: string;
+};
 
-export type SESSendOptions = Omit<SendRawEmailCommandInput, 'RawMessage'>;
+export type SESClientConfig = {
+  region?: string;
+  endpoint?: string;
+  credentials?: SESCredentials;
+  [option: string]: unknown;
+};
+
+export type SESMessageTag = {
+  Name: string;
+  Value: string;
+};
+
+export type SESSendOptions = {
+  type: EmailClientTypes.SES;
+  Source?: string;
+  Destinations?: string[];
+  FromArn?: string;
+  SourceArn?: string;
+  ReturnPathArn?: string;
+  Tags?: SESMessageTag[];
+  ConfigurationSetName?: string;
+};
 
 export type SESOptions = {
   defaultSenderEmail: string;
-  config?: SESClientConfigType;
+  config?: SESClientConfig;
 };
 
 export type SESClientOptions = {
@@ -52,13 +73,21 @@ export type SESClientOptions = {
   SES: SESOptions;
 };
 
-/**
- * MailTrap Client Types
- */
+export type MailtrapClientConfig = {
+  token: string;
+  sandbox?: boolean;
+  testInboxId?: number;
+  accountId?: number;
+  organizationId?: number;
+  bulk?: boolean;
+  [option: string]: unknown;
+};
+
 export type MailtrapSendOptions = {
+  type: EmailClientTypes.MAILTRAP;
   category?: string;
-  custom_variables?: CustomVariables;
-  sandbox?: boolean | undefined;
+  custom_variables?: Record<string, string | number | boolean>;
+  sandbox?: boolean;
 };
 
 export type MailtrapOptions = {
@@ -71,12 +100,9 @@ export type MailtrapClientOptions = {
   MAILTRAP: MailtrapOptions;
 };
 
-/**
- * Email Client Options Type
- */
 export type EmailClientOptions = SESClientOptions | MailtrapClientOptions;
 
-export type AdditionalSendEmailProps = SESSendOptions & MailtrapSendOptions;
+export type AdditionalSendEmailProps = SESSendOptions | MailtrapSendOptions;
 
 export type SendEmailProps = {
   emailData: EmailBodyProps;
@@ -84,17 +110,26 @@ export type SendEmailProps = {
   options?: AdditionalSendEmailProps;
 };
 
-/**
- * Module Options Types
- */
+export type SendEmailResult = {
+  messageId: string | undefined;
+  provider: EmailClientTypes;
+  raw: unknown;
+};
+
 export type EmailModuleClientOptions = { key: string; default?: boolean } & EmailClientOptions;
 
 export type EmailModuleOptions = {
   clients: EmailModuleClientOptions[];
 };
 
-export type EmailModuleAsyncOptions = {
-  imports?: ModuleMetadata['imports'];
-  useFactory: (...args: any[]) => Promise<EmailModuleOptions> | EmailModuleOptions;
-  inject?: any[];
+export type FormattedEmail = {
+  from: EmailUserAddress;
+  to: EmailUserAddress[];
+  cc?: EmailUserAddress[];
+  bcc?: EmailUserAddress[];
+  subject: string;
+  text?: string;
+  html?: string;
+  attachments?: EmailAttachment[];
+  headers?: Record<string, string>;
 };

@@ -1,0 +1,26 @@
+---
+description: NestJS mailer API and test conventions
+globs: src/**/*.ts
+alwaysApply: false
+---
+
+# Library practices
+
+`EmailService.send()` is the only send API. Register clients through `EmailsModule.forRoot()` or `forRootAsync()`. `isGlobal` defaults to `true`.
+
+- At most one client has `default: true`. Duplicate `key`s throw while the module starts.
+- `send()` copies addresses. It does not mutate `emailData`. Addresses are trimmed, lowercased, and de-duplicated.
+- `text` and `html` are separate strings. At least one is required. A missing `from` uses that client's `defaultSenderEmail`.
+- Send options are discriminated by `type`. SES fields stay on the SES command. Mailtrap fields stay on Mailtrap.
+- Throw `DuplicateEmailClientKeyError`, `MultipleDefaultEmailClientsError`, `NoDefaultEmailClientError`, `UnknownEmailClientKeyError`, `InvalidEmailContentError`, `EmailProviderNotInstalledError`, or `EmailClientTypeMismatchError`. Do not throw a plain `Error` for these cases.
+- `send()` returns `{ messageId, provider, raw }`.
+- Load `@aws-sdk/client-ses` and `mailtrap` on first use with `require`. A missing package throws `EmailProviderNotInstalledError` and names the package to install. `nodemailer` is a required peer and may be imported directly.
+- The main entry's SES and Mailtrap config types stay free of `@aws-sdk/client-ses` and `mailtrap` imports. `src/ses.ts` and `src/mailtrap.ts` may import those SDKs. `sesClient()` and `mailtrapClient()` pass the SDK config object through. `sesSendOptions()` and `mailtrapSendOptions()` pass SDK send fields through, except SES `RawMessage`.
+
+Public exports belong in `src/index.ts`: `EmailsModule`, `EmailService`, `EmailClientTypes`, the option types, and the errors. `src/ses.ts` and `src/mailtrap.ts` are the `./ses` and `./mailtrap` package entries. Do not export `SESClientService`, `MailtrapClientService`, `EmailUtilsService`, `EmailClientHandlerService`, or `EMAIL_OPTIONS`.
+
+```typescript
+export { EmailService } from './services/email.service';
+```
+
+Put tests in `src/**/__tests__/`. Test `EmailsModule` and `EmailService` from `src/index.ts`. Mock `@aws-sdk/client-ses` and `mailtrap`. Do not send real email. Keep `strict` TypeScript, including `noImplicitAny`. Build with `tsc -p tsconfig.build.json` so specs are not emitted.

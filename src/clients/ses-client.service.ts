@@ -1,58 +1,85 @@
-import { SendRawEmailCommand, SESClient } from '@aws-sdk/client-ses';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { loadOptionalPackage } from './load-optional-package';
+import { stableStringify } from './stable-key';
 import { EmailUtilsService } from '../services/email-utils.service';
+import type { EmailUtilsService as EmailUtils } from '../services/email-utils.service';
 import {
-  AdditionalSendEmailProps,
   EmailBodyProps,
-  EmailClientOptions,
   EmailClientTypes,
-  SESOptions,
+  SESClientConfig,
+  SESClientOptions,
+  SESSendOptions,
+  SendEmailResult,
 } from '../types/emails.types';
-import { EmailClientService } from './email-client.service';
+
+type SesSdk = {
+  SESClient: new (config?: SESClientConfig) => {
+    send: (command: unknown) => Promise<unknown>;
+  };
+  SendRawEmailCommand: new (input: Record<string, unknown>) => unknown;
+};
+
+type SesClient = {
+  send: (command: unknown) => Promise<unknown>;
+};
 
 @Injectable()
-export class SESClientService implements EmailClientService {
-  private readonly sesClients = new Map<string, SESClient>();
+export class SESClientService {
+  private readonly clients = new Map<string, SesClient>();
+  private readonly emailUtils: EmailUtils;
 
-  constructor(private readonly emailUtilsService: EmailUtilsService) {}
+  constructor(@Inject(EmailUtilsService) emailUtils: EmailUtils) {
+    this.emailUtils = emailUtils;
+  }
 
   async send(props: {
     emailData: EmailBodyProps;
-    clientOptions: EmailClientOptions;
-    options?: AdditionalSendEmailProps;
-  }): Promise<any> {
-    const { emailData, clientOptions, options } = props;
+    clientOptions: SESClientOptions;
+    options?: SESSendOptions;
+  }): Promise<SendEmailResult> {
+    const message = await this.emailUtils.toMime(
+      props.emailData,
+      props.clientOptions.SES.defaultSenderEmail,
+    );
+    const client = this.clientFor(props.clientOptions.SES.config);
+    const sdk = this.sdk();
+    const response = await client.send(
+      new sdk.SendRawEmailCommand({
+        ...this.commandOptions(props.options),
+        RawMessage: { Data: message },
+      }),
+    );
 
-    if (clientOptions.type !== EmailClientTypes.SES) {
-      throw new Error('Invalid email service client');
-    }
-
-    if (!emailData.from) {
-      emailData.from = clientOptions.SES.defaultSenderEmail;
-    }
-
-    const sesClient = this.getSESClient(clientOptions.SES);
-    const message = await this.emailUtilsService.getParsedContent(emailData);
-
-    const command = new SendRawEmailCommand({
-      ...(options || {}),
-      RawMessage: { Data: message },
-    });
-
-    const response = await sesClient.send(command);
-    return response;
+    return {
+      messageId: this.emailUtils.messageIdFrom(response),
+      provider: EmailClientTypes.SES,
+      raw: response,
+    };
   }
 
-  private getSESClient(reqOptions: SESOptions) {
-    const credentials = reqOptions.config || {};
+  private clientFor(config: SESClientConfig | undefined): SesClient {
+    const key = stableStringify(config ?? {});
+    const cached = this.clients.get(key);
+    if (cached) {
+      return cached;
+    }
 
-    const key = JSON.stringify(credentials);
-    const cachedClient = this.sesClients.get(key);
-    if (cachedClient) return cachedClient;
-
-    const client = new SESClient(credentials);
-
-    this.sesClients.set(key, client);
+    const client = new (this.sdk().SESClient)(config ?? {});
+    this.clients.set(key, client);
     return client;
+  }
+
+  private sdk(): SesSdk {
+    return loadOptionalPackage('@aws-sdk/client-ses') as SesSdk;
+  }
+
+  private commandOptions(options: SESSendOptions | undefined): Record<string, unknown> {
+    if (!options) {
+      return {};
+    }
+
+    const command: Record<string, unknown> = { ...options };
+    delete command.type;
+    return command;
   }
 }

@@ -1,34 +1,20 @@
-import { Injectable } from '@nestjs/common';
-import { EmailClientOptions, SendEmailProps } from '../types/emails.types';
+import { Inject, Injectable } from '@nestjs/common';
 import { EmailClientHandlerService } from './email-client-handler.service';
+import type { EmailClientHandlerService as EmailClientHandler } from './email-client-handler.service';
+import { SendEmailProps, SendEmailResult } from '../types/emails.types';
 
 @Injectable()
 export class EmailService {
-  constructor(private readonly handler: EmailClientHandlerService) {}
+  private readonly handler: EmailClientHandler;
 
-  async send(props: SendEmailProps): Promise<any> {
-    const { emailData, client, options } = props;
-
-    const clientOptions = this.getClientOptions(client);
-    if (!clientOptions) {
-      throw new Error('Invalid email service client options');
-    }
-
-    const clientService = this.handler.getClientService(clientOptions.type);
-    if (!clientService) {
-      throw new Error('Unable to find email service client');
-    }
-
-    return clientService.send({ emailData, clientOptions, options });
+  constructor(@Inject(EmailClientHandlerService) handler: EmailClientHandler) {
+    this.handler = handler;
   }
 
-  private getClientOptions(client?: string | EmailClientOptions) {
-    if (!client) return this.handler.getDefaultClientOptions();
-
-    if (typeof client === 'string') {
-      return this.handler.getClientOptions(client);
-    }
-
-    return client;
+  /**
+   * Sends one email through a registered client, or through `client` when it is passed inline.
+   */
+  send(props: SendEmailProps): Promise<SendEmailResult> {
+    return this.handler.send(props);
   }
 }

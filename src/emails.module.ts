@@ -1,55 +1,39 @@
-import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
+import { ConfigurableModuleBuilder, Module } from '@nestjs/common';
 import { MailtrapClientService } from './clients/mailtrap-client.service';
 import { SESClientService } from './clients/ses-client.service';
 import { EMAIL_OPTIONS } from './constants/email.constants';
 import { EmailClientHandlerService } from './services/email-client-handler.service';
 import { EmailUtilsService } from './services/email-utils.service';
 import { EmailService } from './services/email.service';
-import { EmailModuleAsyncOptions, EmailModuleOptions } from './types/emails.types';
+import { EmailModuleOptions } from './types/emails.types';
 
-const clients: Provider[] = [SESClientService, MailtrapClientService];
+const moduleProviders = [
+  EmailClientHandlerService,
+  EmailUtilsService,
+  EmailService,
+  SESClientService,
+  MailtrapClientService,
+];
 
-@Global()
-@Module({
-  providers: [EmailUtilsService, EmailService, EmailClientHandlerService, ...clients],
-  exports: [EmailService],
+const { ConfigurableModuleClass } = new ConfigurableModuleBuilder<EmailModuleOptions>({
+  optionsInjectionToken: EMAIL_OPTIONS,
 })
-export class EmailsModule {
-  static forRoot(options: EmailModuleOptions): DynamicModule {
-    return {
-      module: EmailsModule,
-      providers: [
-        {
-          provide: EMAIL_OPTIONS,
-          useValue: options,
-        },
-        EmailClientHandlerService,
-        EmailUtilsService,
-        EmailService,
-        ...clients,
-      ],
-      exports: [EmailService],
-      global: true,
-    };
-  }
+  .setClassMethodName('forRoot')
+  .setExtras({ isGlobal: true }, (definition, extras) => ({
+    ...definition,
+    global: extras.isGlobal ?? true,
+    providers: [
+      ...(definition.providers as NonNullable<typeof definition.providers>),
+      ...moduleProviders,
+    ],
+    exports: [EmailService],
+  }))
+  .build();
 
-  static forRootAsync(options: EmailModuleAsyncOptions): DynamicModule {
-    return {
-      module: EmailsModule,
-      imports: options.imports,
-      providers: [
-        {
-          provide: EMAIL_OPTIONS,
-          useFactory: options.useFactory,
-          inject: options.inject,
-        },
-        EmailClientHandlerService,
-        EmailUtilsService,
-        EmailService,
-        ...clients,
-      ],
-      exports: [EmailService],
-      global: true,
-    };
-  }
-}
+/**
+ * Registers {@link EmailService}.
+ * Call `forRoot` or `forRootAsync`. The module is global unless `isGlobal` is false.
+ * Importing this class without `forRoot` does not register the mail services.
+ */
+@Module({})
+export class EmailsModule extends ConfigurableModuleClass {}

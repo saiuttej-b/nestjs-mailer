@@ -1,33 +1,18 @@
 # Contributing
 
-1. [Fork it](https://help.github.com/articles/fork-a-repo/)
-2. We use PNPM as our package manager. Install it if you haven't already (`npm install -g pnpm`)
-3. Install dependencies (`pnpm install`)
-4. Create your feature branch (`git checkout -b my-new-feature`)
-5. Commit your changes (`git commit -am 'Added some feature'`)
-6. Test your changes (`npm test`)
-7. Push to the branch (`git push origin my-new-feature`)
-8. [Create new Pull Request](https://help.github.com/articles/creating-a-pull-request/)
+1. [Fork the repository](https://help.github.com/articles/fork-a-repo/).
+2. Install pnpm (`npm install -g pnpm@10.15.0`) and dependencies (`pnpm install`).
+3. Create a feature branch (`git checkout -b my-new-feature`).
+4. Format, lint, and test before opening a pull request:
 
-## Testing
-
-We use [Jest](https://github.com/facebook/jest) to write tests. Run our test suite with this command:
-
-```
-pnpm test
-```
-
-## Code Style
-
-We use [Prettier](https://prettier.io/) and tslint to maintain code style and best practices.
-Please make sure your PR adheres to the guides by running:
-
-```
-pnpm run format
-```
-
-and
-
-```
+```bash
+pnpm exec prettier --write "src/**/*.ts"
 pnpm run lint
+pnpm run test:cov
 ```
+
+`pnpm run lint` is a check. Use `pnpm run lint:fix` to apply ESLint fixes, then run `pnpm run lint` again. Coverage stays at 100% statements, branches, functions, and lines.
+
+5. Push the branch and [open a pull request](https://help.github.com/articles/creating-a-pull-request/).
+
+User-facing API changes need a `CHANGELOG.md` entry and a README update when setup or behavior changes.
